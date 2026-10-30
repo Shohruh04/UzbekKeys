@@ -111,11 +111,17 @@ try {
     Copy-Item -LiteralPath (Join-Path $projectRoot 'LICENSE') -Destination (Join-Path $distRoot 'LICENSE.txt') -Force
     Copy-Item -LiteralPath (Join-Path $projectRoot 'README.md') -Destination (Join-Path $distRoot 'README.md') -Force
     Copy-Item -LiteralPath (Join-Path $projectRoot 'docs\assets\keyboard-layout.svg') -Destination (Join-Path $distRoot 'keyboard-layout.svg') -Force
+    $docsAssets=Join-Path $distRoot 'docs\assets'
+    New-Item -ItemType Directory -Path $docsAssets -Force | Out-Null
+    foreach($asset in 'hero.png','video-poster.png','keyboard-layout.svg') {
+        Copy-Item -LiteralPath (Join-Path $projectRoot ('docs\assets\'+$asset)) -Destination $docsAssets -Force
+    }
     $installerTests = Join-Path $buildRoot 'InstallerTests.exe'
     Invoke-Checked $csc @('/nologo','/target:exe','/main:InstallerTests','/platform:x86','/r:System.Windows.Forms.dll',('/out:'+$installerTests),(Join-Path $projectRoot 'scripts\InstallerTests.cs'),(Join-Path $projectRoot 'installer\Bootstrapper.cs'))
     Invoke-Checked $installerTests @()
     Invoke-Checked 'python' @((Join-Path $PSScriptRoot 'test_layout.py'))
     $zipInputs = @('UzbekKeys-Setup.exe','Uninstall.exe','UzbekKeys-x86.msi','UzbekKeys-x64.msi','UzbekKeys-arm64.msi','LICENSE.txt','README.md','keyboard-layout.svg') | ForEach-Object { Join-Path $distRoot $_ }
+    $zipInputs += Join-Path $distRoot 'docs'
     Compress-Archive -LiteralPath $zipInputs -DestinationPath (Join-Path $distRoot 'UzbekKeys-Windows.zip') -Force
     $hashInputs = @('UzbekKeys-Setup.exe','Uninstall.exe','UzbekKeys-x86.msi','UzbekKeys-x64.msi','UzbekKeys-arm64.msi','UzbekKeys-Windows.zip')
     $checksums = foreach ($name in $hashInputs) { ((Get-FileHash -LiteralPath (Join-Path $distRoot $name) -Algorithm SHA256).Hash.ToLowerInvariant())+'  '+$name }
