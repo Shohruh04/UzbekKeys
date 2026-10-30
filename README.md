@@ -105,7 +105,7 @@ powershell -ExecutionPolicy Bypass -File scripts/Test-Installed.ps1
 
 Tekşiruvlar DLL içidagi belgilar, arxitektura, katta/kiçik harflar va US QWERTY mosligini soliştiradi. Örnatilgan tartibni tekşiriş Windows’ning `ToUnicodeEx` mexanizmidan foydalanadi.
 
-README rasmining yaratiş tavsifi [`docs/assets/hero-prompt.txt`](docs/assets/hero-prompt.txt) faylida saqlangan. Tayyor taniştiruv videosi [Releases](https://github.com/Shohruh04/UzbekKeys/releases/latest) böl imida joylaşgan.
+README rasmining yaratiş tavsifi [`docs/assets/hero-prompt.txt`](docs/assets/hero-prompt.txt) faylida saqlangan. Tayyor taniştiruv videosi [Releases](https://github.com/Shohruh04/UzbekKeys/releases/latest) bölimida joylaşgan.
 
 ## Hissa qöşiş
 
