@@ -1,0 +1,10 @@
+Use case: ads-marketing
+Asset type: wide GitHub README product banner, 16:9 landscape.
+Primary request: A polished, minimal product hero for UzbekKeys, an open-source native Windows keyboard layout for the new Uzbek alphabet.
+Scene/backdrop: deep midnight navy studio background with subtle cyan ambient light, generous negative space, crisp premium software-product advertising aesthetic.
+Subject: four large sculpted keyboard keycaps in the foreground, evenly spaced, with exact labels "Ö", "Ğ", "Ş", "Ç" (one on each key). Modern clean typography, softly lit dark graphite keycaps with cyan edge highlights. A softly out-of-focus compact keyboard silhouette may appear behind the four keys.
+Composition: clean centered arrangement, comfortably padded. Above the keycaps a clear elegant heading with exact text "UzbekKeys". Below the heading a small exact subtitle "Ö Ğ Ş Ç". Avoid any other words.
+Style/medium: high quality 3D product photography, photoreal materials, restrained cyan glow, sophisticated and readable at GitHub README width.
+Constraints: the four Turkish/Uzbek Unicode characters must be exact: O with diaeresis Ö, G with breve Ğ, S with cedilla Ş, C with cedilla Ç. No comma-below variants. No Windows logo or other brands, no screenshots, no invented interface, no watermark. Opaque background.
+
+Generated with the built-in image_gen tool.

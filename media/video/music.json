@@ -1,0 +1,10 @@
+{
+  "provider": "ElevenLabs",
+  "model": "eleven_music_v2_5",
+  "status": "generated",
+  "instrumental": true,
+  "durationSeconds": 24,
+  "prompt": "Restrained ambient electronic instrumental, warm soft synth chords, delicate plucked arpeggios, a gentle understated pulse at 90 BPM. Calm, bright and quietly confident with crisp modern production, no vocals, no dramatic build, designed to sit unobtrusively beneath a spoken product introduction.",
+  "processing": "Normalized to -18 LUFS / -2 dBTP. Remotion automates low background volume under speech, with a soft fade in and fade out.",
+  "file": "public/music.mp3"
+}

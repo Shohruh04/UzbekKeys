@@ -1,0 +1,68 @@
+<Wix xmlns="http://wixtoolset.org/schemas/v4/wxs" xmlns:util="http://wixtoolset.org/schemas/v4/wxs/util">
+  <?if $(sys.BUILDARCH) = x86 ?>
+    <?define NativeSystemFolder = SystemFolder ?>
+  <?else?>
+    <?define NativeSystemFolder = System64Folder ?>
+  <?endif?>
+  <Package Name="UzbekKeys" Manufacturer="Shohruh04" Version="1.0.0"
+           ProductCode="$(var.ProductCode)" UpgradeCode="$(var.UpgradeCode)"
+           Language="1033" Scope="perMachine" InstallerVersion="500">
+    <SummaryInformation Description="UzbekKeys native Uzbek keyboard" />
+    <MajorUpgrade DowngradeErrorMessage="UzbekKeys’ning yangiroq versiyasi örnatilgan." />
+    <MediaTemplate EmbedCab="yes" />
+    <util:QueryNativeMachine />
+    <Property Id="ARPCOMMENTS" Value="Özbek lotin alifbosi uçun native Windows klaviaturasi." />
+    <Property Id="ARPURLINFOABOUT" Value="https://github.com/Shohruh04/UzbekKeys" />
+    <Property Id="ARPNOMODIFY" Value="1" />
+    <Property Id="OSBUILDNUMBER"><RegistrySearch Id="OSBuild" Root="HKLM" Key="SOFTWARE\Microsoft\Windows NT\CurrentVersion" Name="CurrentBuildNumber" Type="raw" /></Property>
+    <Property Id="EXISTINGLAYOUT"><RegistrySearch Id="ExistingLayout" Root="HKLM" Key="SYSTEM\CurrentControlSet\Control\Keyboard Layouts\A0010443" Name="Layout File" Type="raw" /></Property>
+    <Launch Condition="Installed OR OSBUILDNUMBER &gt;= 10240" Message="Windows 10 yoki Windows 11 kerak." />
+    <Launch Condition="Installed OR NOT EXISTINGLAYOUT OR EXISTINGLAYOUT ~= &quot;uzbkeys.dll&quot;" Message="Klaviatura identifikatori band. Mavjud klaviatura özgartirilmadi." />
+    <?if $(sys.BUILDARCH) = x86 ?>
+      <Launch Condition="Installed OR WIX_NATIVE_MACHINE = 332" Message="Bu paket x86 Windows uçun." />
+    <?elseif $(sys.BUILDARCH) = x64 ?>
+      <Launch Condition="Installed OR WIX_NATIVE_MACHINE = 34404" Message="Bu paket x64 Windows uçun." />
+    <?else?>
+      <Launch Condition="Installed OR WIX_NATIVE_MACHINE = 43620" Message="Bu paket ARM64 Windows uçun." />
+    <?endif?>
+
+    <StandardDirectory Id="ProgramFiles6432Folder">
+      <Directory Id="INSTALLFOLDER" Name="UzbekKeys">
+        <Component Id="Uninstaller" Guid="*">
+          <File Id="UninstallExe" Source="$(var.UninstallExe)" Name="Uninstall.exe" KeyPath="yes" />
+        </Component>
+        <Component Id="License" Guid="*"><File Source="$(var.LicenseFile)" Name="LICENSE.txt" KeyPath="yes" /></Component>
+      </Directory>
+    </StandardDirectory>
+    <StandardDirectory Id="$(var.NativeSystemFolder)">
+        <Component Id="NativeLayout" Guid="*">
+          <File Id="NativeDll" Source="$(var.NativeDll)" Name="uzbkeys.dll" KeyPath="yes" />
+          <RegistryKey Root="HKLM" Key="SYSTEM\CurrentControlSet\Control\Keyboard Layouts\A0010443">
+            <RegistryValue Name="Layout File" Value="uzbkeys.dll" Type="string" />
+            <RegistryValue Name="Layout Text" Value="UzbekKeys" Type="string" />
+            <RegistryValue Name="Layout Id" Value="0f43" Type="string" />
+            <RegistryValue Name="Layout Product Code" Value="[ProductCode]" Type="string" />
+            <RegistryValue Name="Custom Language Name" Value="Uzbek (Latin, Uzbekistan)" Type="string" />
+          </RegistryKey>
+        </Component>
+      </StandardDirectory>
+    <?if $(sys.BUILDARCH) != x86 ?>
+      <StandardDirectory Id="SystemFolder">
+        <Component Id="Wow64Layout" Guid="*" Bitness="always32">
+          <File Id="Wow64Dll" Source="$(var.Wow64Dll)" Name="uzbkeys.dll" KeyPath="yes" />
+        </Component>
+      </StandardDirectory>
+    <?endif?>
+    <Binary Id="ProfileHelper" SourceFile="$(var.UninstallExe)" />
+    <CustomAction Id="EnableProfile" BinaryRef="ProfileHelper" ExeCommand="/enable-profile" Execute="immediate" Impersonate="yes" Return="ignore" />
+    <CustomAction Id="DisableProfile" BinaryRef="ProfileHelper" ExeCommand="/disable-profile" Execute="immediate" Impersonate="yes" Return="ignore" />
+    <InstallExecuteSequence>
+      <Custom Action="DisableProfile" After="InstallFinalize" Condition="REMOVE~=&quot;ALL&quot; AND NOT UPGRADINGPRODUCTCODE" />
+      <Custom Action="EnableProfile" After="DisableProfile" Condition="NOT REMOVE~=&quot;ALL&quot;" />
+    </InstallExecuteSequence>
+    <Feature Id="Keyboard" Title="UzbekKeys" Level="1">
+      <ComponentRef Id="NativeLayout" /><ComponentRef Id="Uninstaller" /><ComponentRef Id="License" />
+      <?if $(sys.BUILDARCH) != x86 ?><ComponentRef Id="Wow64Layout" /><?endif?>
+    </Feature>
+  </Package>
+</Wix>
