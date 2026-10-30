@@ -28,6 +28,8 @@ UzbekKeys yangi harflarni Windows’ning öz klaviatura mexanizmi orqali yozadi.
 
 Manba kodi **Code → Download ZIP** orqali yoki `git clone` bilan olinadi. Işga tayyor paketlar esa [Releases](https://github.com/Shohruh04/UzbekKeys/releases) sahifasida joylaşadi.
 
+[![Ovozli taniştiruv videosi](docs/assets/video-poster.png)](https://github.com/Shohruh04/UzbekKeys/releases/latest/download/UzbekKeys-Promo.mp4)
+
 ## Örnatiş
 
 1. `UzbekKeys-Setup.exe` faylini yuklab oling va işga tuşiring.
