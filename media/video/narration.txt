@@ -1,5 +1,0 @@
-UzbekKeys. Yangi o‘zbek alifbosi, tanish klaviaturangizda.
-To‘rtta yangi harfni bitta tugma bilan yozing.
-Katta harflar uchun Shift. Belgilar uchun o‘ng Alt.
-Win va Space bilan UzbekKeys’ni tanlang.
-Bepul va ochiq kodli. Yuklab oling, sinab ko‘ring.

@@ -5,3 +5,4 @@ artifacts/
 *.user
 **/debug.log
 **/__pycache__/
+/media/video/
