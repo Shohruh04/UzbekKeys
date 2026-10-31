@@ -1,17 +1,19 @@
 using System;
 using System.Diagnostics;
 using System.ComponentModel;
+using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
 using System.Runtime.InteropServices;
+using System.Text;
 using System.Windows.Forms;
 using Microsoft.Win32;
 
 [assembly: AssemblyTitle("UzbekKeys")]
 [assembly: AssemblyCompany("Shohruh04")]
 [assembly: AssemblyProduct("UzbekKeys")]
-[assembly: AssemblyVersion("1.0.0.0")]
-[assembly: AssemblyFileVersion("1.0.0.0")]
+[assembly: AssemblyVersion("1.0.1.0")]
+[assembly: AssemblyFileVersion("1.0.1.0")]
 
 internal static class Bootstrapper
 {
@@ -38,9 +40,13 @@ internal static class Bootstrapper
     [DllImport("input.dll", CharSet = CharSet.Unicode, ExactSpelling = true)]
     [return: MarshalAs(UnmanagedType.Bool)]
     private static extern bool InstallLayoutOrTip(string profiles, uint flags);
-    [DllImport("user32.dll", CharSet = CharSet.Unicode)]
-    private static extern IntPtr LoadKeyboardLayout(string id, uint flags);
-    [DllImport("user32.dll")] private static extern bool UnloadKeyboardLayout(IntPtr hkl);
+    [DllImport("user32.dll")]
+    private static extern int GetKeyboardLayoutList(int count, [Out] IntPtr[] layouts);
+    [DllImport("user32.dll", SetLastError = true)]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    private static extern bool UnloadKeyboardLayout(IntPtr hkl);
+    [DllImport("msi.dll", CharSet = CharSet.Unicode, ExactSpelling = true)]
+    private static extern uint MsiEnumRelatedProductsW(string upgradeCode, uint reserved, uint index, StringBuilder productCode);
 
     internal static string GetArchitecture()
     {
@@ -75,15 +81,40 @@ internal static class Bootstrapper
         }
     }
 
-    internal static string GetProductCode(string architecture)
+    internal static string GetUpgradeCode(string architecture)
     {
         switch (architecture)
         {
-            case "x86": return "{0325C442-84EF-42EC-A531-BE53A1B3CD31}";
-            case "x64": return "{D96A670B-71C2-4C92-827B-640E2C825C53}";
-            case "arm64": return "{C65B72F6-06AA-43F1-9F8E-0D114E6EE842}";
+            case "x86": return "{4F0FD64D-CE6D-4681-B5AA-4C28C61D8971}";
+            case "x64": return "{D4E781D3-6C5A-4191-8386-B01FCCB2E0A1}";
+            case "arm64": return "{5D4ACD27-6BB3-472D-85D2-F865908CE932}";
             default: throw new ArgumentException("Unknown architecture");
         }
+    }
+
+    internal static string[] GetInstalledProducts(string architecture)
+    {
+        var products = new List<string>();
+        for (uint index = 0; ; index++)
+        {
+            var product = new StringBuilder(39);
+            uint result = MsiEnumRelatedProductsW(GetUpgradeCode(architecture), 0, index, product);
+            if (result == 259) return products.ToArray(); // ERROR_NO_MORE_ITEMS.
+            if (result != 0) throw new Win32Exception((int)result);
+            products.Add(product.ToString());
+        }
+    }
+
+    internal static bool UnloadProductLayouts(IntPtr[] layouts, Func<IntPtr, bool> unload)
+    {
+        bool success = true;
+        foreach (IntPtr layout in layouts)
+        {
+            // Layout Id 0f43 + language 0443 produces FF430443. HKLs can be
+            // sign-extended on x64. Never unload other Uzbek or default layouts.
+            if (unchecked((uint)layout.ToInt64()) == 0xff430443u && !unload(layout)) success = false;
+        }
+        return success;
     }
 
     // Only this product's exact profile is enabled/disabled. No default-profile flag.
@@ -91,13 +122,18 @@ internal static class Bootstrapper
     {
         try
         {
-            if (!enable)
-            {
-                // Load without activating, then unload this layout from this process.
-                IntPtr hkl = LoadKeyboardLayout(LayoutId, 0x80);
-                if (hkl != IntPtr.Zero) UnloadKeyboardLayout(hkl);
-            }
-            return InstallLayoutOrTip(Profile, enable ? 0u : 1u);
+            bool changed = InstallLayoutOrTip(Profile, enable ? 0u : 1u);
+            if (enable) return changed;
+            // Remove saved profile first; a preloaded/in-use HKL may resist unload.
+            // Enumerate the existing handle: loading by KLID after MSI removed its
+            // registration fails or falls back to a different keyboard layout.
+            int count = GetKeyboardLayoutList(0, null);
+            IntPtr[] layouts = new IntPtr[count];
+            int copied = GetKeyboardLayoutList(count, layouts);
+            if (copied == 0) return false;
+            Array.Resize(ref layouts, copied);
+            bool unloaded = UnloadProductLayouts(layouts, UnloadKeyboardLayout);
+            return changed && unloaded;
         }
         catch (Exception) { return false; }
     }
@@ -204,12 +240,22 @@ internal static class Bootstrapper
                 }
                 // MSI performs profile cleanup after successful removal. Repeat afterward
                 // for the initiating user when elevation used a different admin account.
-                int code = RunInstaller("/x " + GetProductCode(architecture) + " /qb /norestart");
-                if (code == 1602) return code;
+                int code = 0;
+                // Enumerate before removal so old and current versions can both be
+                // removed without assuming the downloaded uninstaller's version.
+                foreach (string product in GetInstalledProducts(architecture))
+                {
+                    code = RunInstaller("/x " + product + " /qb /norestart");
+                    if (code == 1602) return code;
+                    if (!Success(code) && code != 1605) break;
+                }
                 if (Success(code) || code == 1605)
                 {
-                    ChangeProfile(false);
-                    Inform("UzbekKeys öçirildi. Zarur bölsa, Windows’dan çiqib qayta kiring.", MessageBoxIcon.Information);
+                    bool cleaned = ChangeProfile(false);
+                    Inform(cleaned
+                        ? "UzbekKeys öçirildi."
+                        : "UzbekKeys fayllari öçirildi. Windows klaviatura profilini töliq yangilay olmadi.\n\nWindows hisobidan çiqib qayta kiring. Tartib qolsa, Language options orqali olib taşlang.",
+                        cleaned ? MessageBoxIcon.Information : MessageBoxIcon.Warning);
                 }
                 else Inform("Öçiriş tugamadi. Windows Installer kodi: " + code + ". Klaviatura saqlangan bölişi mumkin.", MessageBoxIcon.Warning);
                 return code;

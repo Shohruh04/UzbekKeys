@@ -4,7 +4,7 @@
   <?else?>
     <?define NativeSystemFolder = System64Folder ?>
   <?endif?>
-  <Package Name="UzbekKeys" Manufacturer="Shohruh04" Version="1.0.0"
+  <Package Name="UzbekKeys" Manufacturer="Shohruh04" Version="1.0.1"
            ProductCode="$(var.ProductCode)" UpgradeCode="$(var.UpgradeCode)"
            Language="1033" Scope="perMachine" InstallerVersion="500">
     <SummaryInformation Description="UzbekKeys native Uzbek keyboard" />

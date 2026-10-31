@@ -90,9 +90,9 @@ try {
     $commonCsc = @('/nologo','/target:winexe','/platform:x86','/optimize+','/r:System.Windows.Forms.dll',('/win32manifest:'+(Join-Path $projectRoot 'installer\app.manifest')))
     Invoke-Checked $csc ($commonCsc + @(('/out:'+$uninstaller),(Join-Path $projectRoot 'installer\Bootstrapper.cs')))
     $products = @{
-        x86=@('{0325C442-84EF-42EC-A531-BE53A1B3CD31}','{4F0FD64D-CE6D-4681-B5AA-4C28C61D8971}')
-        x64=@('{D96A670B-71C2-4C92-827B-640E2C825C53}','{D4E781D3-6C5A-4191-8386-B01FCCB2E0A1}')
-        arm64=@('{C65B72F6-06AA-43F1-9F8E-0D114E6EE842}','{5D4ACD27-6BB3-472D-85D2-F865908CE932}')
+        x86=@('{609A6FDF-7BFE-4850-B3A9-EBCC8A94A47F}','{4F0FD64D-CE6D-4681-B5AA-4C28C61D8971}')
+        x64=@('{74946754-4AE4-4BDD-9F0C-5C120848968A}','{D4E781D3-6C5A-4191-8386-B01FCCB2E0A1}')
+        arm64=@('{462766B3-D482-4164-8AC2-AC80AC97AF08}','{5D4ACD27-6BB3-472D-85D2-F865908CE932}')
     }
     foreach ($architecture in 'x86','x64','arm64') {
         $wixArguments = @('build',(Join-Path $projectRoot 'installer\Package.wxs'),'-ext',$utilExtension,'-arch',$architecture,'-out',(Join-Path $distRoot ('UzbekKeys-'+$architecture+'.msi')),
@@ -116,9 +116,11 @@ try {
     foreach($asset in 'hero.png','video-poster.png','keyboard-layout.svg') {
         Copy-Item -LiteralPath (Join-Path $projectRoot ('docs\assets\'+$asset)) -Destination $docsAssets -Force
     }
-    $installerTests = Join-Path $buildRoot 'InstallerTests.exe'
-    Invoke-Checked $csc @('/nologo','/target:exe','/main:InstallerTests','/platform:x86','/r:System.Windows.Forms.dll',('/out:'+$installerTests),(Join-Path $projectRoot 'scripts\InstallerTests.cs'),(Join-Path $projectRoot 'installer\Bootstrapper.cs'))
-    Invoke-Checked $installerTests @()
+    foreach ($testPlatform in 'x86','x64') {
+        $installerTests = Join-Path $buildRoot ('InstallerTests-'+$testPlatform+'.exe')
+        Invoke-Checked $csc @('/nologo','/target:exe','/main:InstallerTests',('/platform:'+$testPlatform),'/r:System.Windows.Forms.dll',('/out:'+$installerTests),(Join-Path $projectRoot 'scripts\InstallerTests.cs'),(Join-Path $projectRoot 'installer\Bootstrapper.cs'))
+        Invoke-Checked $installerTests @()
+    }
     Invoke-Checked 'python' @((Join-Path $PSScriptRoot 'test_layout.py'))
     $zipInputs = @('UzbekKeys-Setup.exe','Uninstall.exe','UzbekKeys-x86.msi','UzbekKeys-x64.msi','UzbekKeys-arm64.msi','LICENSE.txt','README.md','keyboard-layout.svg') | ForEach-Object { Join-Path $distRoot $_ }
     $zipInputs += Join-Path $distRoot 'docs'

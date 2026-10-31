@@ -68,6 +68,8 @@ UzbekKeys’ni ikki usulda olib taşlaş mumkin:
 
 Öçirişdan oldin boşqa klaviaturaga öting va UzbekKeys işlatayotgan dasturlarni yoping. Öçiruvçi faqat UzbekKeys’ni olib taşlaydi; boşqa klaviaturalar va hujjatlar saqlanadi. Windows qayta kiriş yoki qayta yuklaşni sörasa, körsatmaga amal qiling.
 
+Fayllar öçirilganidan keyin Windows joriy sessiyada klaviaturani yuklangan holda saqlaşi mumkin. 1.0.1 öçiruvçisi mavjud UzbekKeys tartibini bevosita böşatadi; uni qayta yuklamaydi. Windows tartibni boşqa dastur işlatayotgani uçun böşata olmasa, hisobdan çiqib qayta kiring.
+
 ## Moslik
 
 | Tizim | Paket arxitekturasi |
